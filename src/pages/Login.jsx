@@ -44,7 +44,7 @@ export default function AuthPage() {
     return () => clearTimeout(timeout);
   }, [isLogin]);
 
-  // Add auth state check on component mount
+  // Initialize auth state and Google SDK on component mount
   useEffect(() => {
     // Check if user is already logged in
     const token = localStorage.getItem('access') || sessionStorage.getItem('access');
@@ -53,7 +53,27 @@ export default function AuthPage() {
       validateAuthToken(token);
     }
 
-    // Check if there's a Google auth code in the URL (for redirect back from Google)
+    // Load Google Identity Services SDK
+    const loadGoogleSDK = () => {
+      if (window.google) return; // Prevent loading multiple times
+      
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        console.log('Google Identity SDK loaded');
+        initializeGoogleAuth(); // Initialize once loaded
+      };
+      script.onerror = () => {
+        console.error('Failed to load Google Identity SDK');
+      };
+      document.body.appendChild(script);
+    };
+    
+    loadGoogleSDK();
+    
+    // Check if there's a Google auth code in the URL (for redirect flow)
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get('code');
     
@@ -64,23 +84,87 @@ export default function AuthPage() {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
-  useEffect(() => {
-    const loadGoogleSDK = () => {
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        console.log('Google Identity SDK loaded');
-      };
-      script.onerror = () => {
-        console.error('Failed to load Google Identity SDK');
-      };
-      document.body.appendChild(script);
-    };
   
-    loadGoogleSDK();
-  }, []);
+  // Initialize Google One Tap / Identity Services
+  const initializeGoogleAuth = () => {
+    if (!window.google) return;
+    
+    try {
+      window.google.accounts.id.initialize({
+        client_id: '847878289589-qvg5hqrijf9nl0apn8htit8flfne12u5.apps.googleusercontent.com',
+        callback: handleGoogleCredentialResponse,
+        auto_select: false, // Don't automatically select first account
+        cancel_on_tap_outside: true // Cancel if user clicks outside
+      });
+    } catch (error) {
+      console.error('Error initializing Google Auth:', error);
+    }
+  };
+  
+  // Handle Google One Tap credential response
+  const handleGoogleCredentialResponse = async (response) => {
+    if (!response.credential) {
+      console.error('No credential received from Google');
+      setError('Google authentication failed. Please try again.');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Send the ID token to your backend
+      const backendResponse = await fetch('https://stream-l2du.onrender.com/api/user/google-login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          token: response.credential 
+        }),
+        credentials: 'include', // Important for cookies
+      });
+      
+      let data;
+      const contentType = backendResponse.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await backendResponse.json();
+      } else {
+        const text = await backendResponse.text();
+        data = { message: text || 'Authentication failed with no message' };
+      }
+      
+      if (!backendResponse.ok) {
+        throw new Error(data.message || `Google authentication failed with status ${backendResponse.status}`);
+      }
+      
+      // Handle successful login
+      const { access, refresh, username, is_new_user } = data;
+      
+      // Store tokens
+      localStorage.setItem('access', access);
+      localStorage.setItem('refresh', refresh);
+      if (username) {
+        localStorage.setItem('username', username);
+      }
+      
+      // Show appropriate message
+      setSuccessMessage(is_new_user 
+        ? 'Account created successfully with Google!' 
+        : `Welcome back, ${username || 'User'}!`);
+      
+      // Navigate to dashboard after slight delay
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Google auth error:', error);
+      setError(error.message || 'Google authentication failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   // Handle Google auth code after redirect
   const handleGoogleAuthCode = async (authCode) => {
@@ -89,16 +173,16 @@ export default function AuthPage() {
     
     try {
       // Send the auth code to your backend
-      const response = await fetch('https://stream-l2du.onrender.com//api/user/google-auth/', {
+      const response = await fetch('https://stream-l2du.onrender.com/api/user/google-auth/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
           code: authCode,
-          redirect_uri: window.location.origin + '/google-callback'  // Must match what you used in the initial request
+          redirect_uri: window.location.origin + '/auth' // Must match what you used in the initial request
         }),
-        credentials: 'include',
+        credentials: 'include', // Important for cookies
       });
       
       let data;
@@ -135,7 +219,7 @@ export default function AuthPage() {
       }, 1000);
       
     } catch (error) {
-      console.error('Google auth error:', error);
+      console.error('Google auth code error:', error);
       setError(error.message || 'Google authentication failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -154,13 +238,53 @@ export default function AuthPage() {
       
       if (response.ok) {
         // Token is valid, redirect to main page
-        navigate('/');
+        navigate('/dashboard');
       }
       // If invalid, we stay on login page (no action needed)
     } catch (error) {
       console.log('Token validation error:', error);
       // We'll stay on the login page
     }
+  };
+
+  // Handle the Google Sign In button click
+  const handleGoogleSignInClick = () => {
+    setError(null);
+    
+    if (!window.google || !window.google.accounts) {
+      setError('Google authentication is not available. Please try again later.');
+      return;
+    }
+    
+    try {
+      // Display the Google One Tap UI
+      window.google.accounts.id.prompt((notification) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          // Fall back to Google OAuth redirect if One Tap doesn't work
+          initiateGoogleOAuthRedirect();
+        }
+      });
+    } catch (error) {
+      console.error('Error displaying Google prompt:', error);
+      // Fall back to OAuth redirect
+      initiateGoogleOAuthRedirect();
+    }
+  };
+  
+  // Fallback to traditional OAuth flow
+  const initiateGoogleOAuthRedirect = () => {
+    // The client ID should match the one used for One Tap
+    const clientId = '847878289589-qvg5hqrijf9nl0apn8htit8flfne12u5.apps.googleusercontent.com';
+    const redirectUri = encodeURIComponent(`${window.location.origin}/auth`);
+    const scope = encodeURIComponent('email profile');
+    const responseType = 'code';
+    const accessType = 'offline';
+    const prompt = 'consent';
+    
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&access_type=${accessType}&prompt=${prompt}`;
+    
+    // Redirect to Google's OAuth page
+    window.location.href = authUrl;
   };
 
   const toggleForm = () => {
@@ -357,58 +481,6 @@ export default function AuthPage() {
       setIsLoading(false);
     }
   };
-  // Modified Google Auth implementation - uses Google Identity Services SDK
-  const handleGoogleAuth = () => {
-    setIsLoading(true);
-    setError(null);
-  
-    try {
-      if (!window.google) {
-        throw new Error('Google Identity SDK not loaded');
-      }
-  
-      google.accounts.id.initialize({
-        client_id: '847878289589-qvg5hqrijf9nl0apn8htit8flfne12u5.apps.googleusercontent.com',
-        callback: async (response) => {
-          const idToken = response.credential;
-  
-          try {
-            const res = await fetch('https://stream-l2du.onrender.com/api/user/google-login/', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ token: idToken }),
-
-            });
-  
-            if (!res.ok) {
-              const errMsg = await res.text();
-              throw new Error(`Backend error: ${errMsg}`);
-            }
-            
-            const data = await res.json();
-            console.log('Login success:', data);
-            // Store token, navigate, etc.
-  
-          } catch (err) {
-            console.error('Backend auth error:', err);
-            setError(err.message || 'Authentication failed');
-          } finally {
-            setIsLoading(false);
-          }
-        },
-      });
-  
-      google.accounts.id.prompt();
-    } catch (err) {
-      console.error('Google auth error:', err);
-      setError(err.message || 'Google authentication failed');
-      setIsLoading(false);
-    }
-  };
-  
-  
 
   // Handle password reset request
   const handleForgotPassword = async () => {
