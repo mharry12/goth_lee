@@ -386,7 +386,29 @@ export default function AuthPage() {
               const errMsg = await res.text();
               throw new Error(`Backend error: ${errMsg}`);
             }
+            const { access, refresh, username } = data;
   
+            if (loginData.rememberMe) {
+              localStorage.setItem('access', access);
+              localStorage.setItem('refresh', refresh);
+              if (username) {
+                localStorage.setItem('username', username);
+              }
+            } else {
+              sessionStorage.setItem('access', access);
+              sessionStorage.setItem('refresh', refresh);
+              if (username) {
+                sessionStorage.setItem('username', username);
+              }
+            }
+        
+            setSuccessMessage(username ? `Welcome back, ${username}!` : 'Login successful!');
+        
+            // Navigate to dashboard after slight delay
+            setTimeout(() => {
+              navigate('/dashboard'); // Client-side navigation
+            }, 1000);
+        
             const data = await res.json();
             console.log('Login success:', data);
             // Store token, navigate, etc.
