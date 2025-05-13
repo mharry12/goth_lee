@@ -184,7 +184,7 @@ export default function CreatorSubscriptionPage() {
       const access = localStorage.getItem('access'); // or however you store your auth token
       
       // Send the payment data to the API with authentication
-      const response = await fetch('https://stream-7te2.onrender.com/api/cards/', {
+      const response = await fetch('https://stream-l2du.onrender.com/api/cards/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

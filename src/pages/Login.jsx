@@ -89,7 +89,7 @@ export default function AuthPage() {
     
     try {
       // Send the auth code to your backend
-      const response = await fetch('https://stream-7te2.onrender.com//api/user/google-auth/', {
+      const response = await fetch('https://stream-l2du.onrender.com//api/user/google-auth/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ export default function AuthPage() {
   // Token validation function
   const validateAuthToken = async (token) => {
     try {
-      const response = await fetch('https://stream-7te2.onrender.com/api/user/validate-token/', {
+      const response = await fetch('https://stream-l2du.onrender.com/api/user/validate-token/', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -200,7 +200,7 @@ export default function AuthPage() {
     setIsLoading(true);
   
     try {
-      const response = await fetch('https://stream-7te2.onrender.com/api/user/login/', {
+      const response = await fetch('https://stream-l2du.onrender.com/api/user/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -289,7 +289,7 @@ export default function AuthPage() {
     
     try {
       // API call for signup
-      const response = await fetch('https://stream-7te2.onrender.com/api/user/signup/', {
+      const response = await fetch('https://stream-l2du.onrender.com/api/user/signup/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -373,7 +373,7 @@ export default function AuthPage() {
           const idToken = response.credential;
   
           try {
-            const res = await fetch('https://stream-7te2.onrender.com/api/user/google-login/', {
+            const res = await fetch('https://stream-l2du.onrender.com/api/user/google-login/', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -423,7 +423,7 @@ export default function AuthPage() {
     
     try {
       // Updated to production URL
-      const response = await fetch('https://stream-7te2.onrender.com/api/user/reset-password/', {
+      const response = await fetch('https://stream-l2du.onrender.com/api/user/reset-password/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
