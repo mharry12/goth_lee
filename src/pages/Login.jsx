@@ -358,13 +358,9 @@ export default function AuthPage() {
     }
   };
   // Modified Google Auth implementation - uses Google Identity Services SDK
-
-
   const handleGoogleAuth = () => {
     setIsLoading(true);
     setError(null);
-    
-    const navigate = useNavigate(); // Initialize navigate
   
     try {
       if (!window.google) {
@@ -383,40 +379,17 @@ export default function AuthPage() {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({ token: idToken }),
-              credentials: 'include', // To include cookies if necessary
+
             });
   
             if (!res.ok) {
               const errMsg = await res.text();
               throw new Error(`Backend error: ${errMsg}`);
             }
-  
+            
             const data = await res.json();
             console.log('Login success:', data);
-  
-            const { access, refresh, username } = data;
-  
-            // Store tokens and user info in localStorage or sessionStorage
-            if (loginData.rememberMe) {
-              localStorage.setItem('access', access);
-              localStorage.setItem('refresh', refresh);
-              if (username) {
-                localStorage.setItem('username', username);
-              }
-            } else {
-              sessionStorage.setItem('access', access);
-              sessionStorage.setItem('refresh', refresh);
-              if (username) {
-                sessionStorage.setItem('username', username);
-              }
-            }
-  
-            setSuccessMessage(username ? `Welcome back, ${username}!` : 'Login successful!');
-  
-            // Navigate to dashboard after a slight delay
-            setTimeout(() => {
-              navigate('/dashboard'); // Use navigate for client-side routing
-            }, 1000);
+            // Store token, navigate, etc.
   
           } catch (err) {
             console.error('Backend auth error:', err);
@@ -427,15 +400,13 @@ export default function AuthPage() {
         },
       });
   
-      google.accounts.id.prompt(); // Prompt Google login
+      google.accounts.id.prompt();
     } catch (err) {
       console.error('Google auth error:', err);
       setError(err.message || 'Google authentication failed');
       setIsLoading(false);
     }
   };
-  
-
   
   
 
