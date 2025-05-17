@@ -289,7 +289,7 @@ const StreamDashboard = () => {
               <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Default</span>
             </div>
             <div className="flex space-x-2">
-              <Link to='./payment'>
+              <Link to='/payment'>
               <button className="flex-1 bg-purple-600 text-white py-2 rounded-md font-medium hover:bg-purple-700 transition-colors">
                 Add Payment Method
               </button>

@@ -171,7 +171,7 @@ const SubscriptionPlans = () => {
                   </ul>
                 </div>
                 <div className="px-6 pb-6">
-                  <Link to="./payment">
+                  <Link to="/payment">
                     <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md">
                       Subscribe
                     </button>
@@ -216,7 +216,7 @@ const SubscriptionPlans = () => {
                   </ul>
                 </div>
                 <div className="px-6 pb-6">
-                  <Link to="./payment">
+                  <Link to="/payment">
                     <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md">
                       Subscribe
                     </button>
@@ -258,7 +258,7 @@ const SubscriptionPlans = () => {
                   </ul>
                 </div>
                 <div className="px-6 pb-6">
-                  <Link to="./payment">
+                  <Link to="/payment">
                     <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md">
                       Subscribe
                     </button>
