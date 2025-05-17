@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Bell, User, Settings, Heart, MessageCircle } from 'lucide-react';
 // Import the image (assuming the path is correct)
-import leeImage from "../assest/lee.jpg";
+import leeImage from "../assest/col.jpg";
 import { Link } from "react-router-dom";
 
 
@@ -117,8 +117,8 @@ const StreamDashboard = () => {
                     <span className={`h-2 w-2 rounded-full ${isBlinking ? 'bg-white' : 'bg-red-300'} mr-1`}></span>
                     LIVE
                   </span>
-                  <h3 className="text-xl font-bold mt-4">goth__egg</h3>
-                  <p className="mt-1 opacity-90">Watch along with Lee</p>
+                  <h3 className="text-xl font-bold mt-4">cindy_col</h3>
+                  <p className="mt-1 opacity-90">Watch along with cindy </p>
                 </div>
                 <div className="mt-6 flex space-x-2">
                   <Link to='/payment'>
@@ -178,7 +178,7 @@ const StreamDashboard = () => {
                   Online
                 </span>
               </div>
-              <h3 className="font-bold">goth__egg</h3>
+              <h3 className="font-bold">cindy_col</h3>
               <p className="text-sm text-gray-500">5.2k subscribers</p>
               <Link to='/payment'>
               <button className="mt-3 w-full bg-purple-600 text-white py-2 rounded-md font-medium hover:bg-purple-700 transition-colors">
@@ -198,7 +198,7 @@ const StreamDashboard = () => {
                   Online
                 </span>
               </div>
-              <h3 className="font-bold">goth__egg</h3>
+              <h3 className="font-bold">cindy_col</h3>
               <p className="text-sm text-gray-500">5.2k subscribers</p>
               <a href='/payment'>
               <button className="mt-3 w-full bg-purple-600 text-white py-2 rounded-md font-medium hover:bg-purple-700 transition-colors">
@@ -217,8 +217,8 @@ const StreamDashboard = () => {
             <h3 className="font-bold text-lg mb-4">Upcoming Streams</h3>
             <ul className="space-y-4">
               <li className="border-b pb-3">
-                <p className="font-medium">Streaming with Lee</p>
-                <p className="text-sm text-gray-500">goth__egg</p>
+                <p className="font-medium">Streaming with cindy</p>
+                <p className="text-sm text-gray-500">cindy_col</p>
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-sm text-purple-600">Today, 11:30pm</span>
                   <button className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full">
@@ -228,7 +228,7 @@ const StreamDashboard = () => {
               </li>
               <li className="border-b pb-3">
                 <p className="font-medium">Behind the Scenes</p>
-                <p className="text-sm text-gray-500">goth__egg</p>
+                <p className="text-sm text-gray-500">cindy_col</p>
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-sm text-purple-600">Tomorrow, 6:30 PM</span>
                   <button className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full">
@@ -237,8 +237,8 @@ const StreamDashboard = () => {
                 </div>
               </li>
               <li>
-                <p className="font-medium">Fun with Lee</p>
-                <p className="text-sm text-gray-500">goth__egg</p>
+                <p className="font-medium">Fun with cindy</p>
+                <p className="text-sm text-gray-500">cindy_col</p>
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-sm text-purple-600">Saturday, 8:00 PM</span>
                   <button className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full">
@@ -330,12 +330,12 @@ const StreamDashboard = () => {
                         <img src={leeImage} alt="Lee" className="w-full h-full object-cover" />
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">goth__egg</div>
+                        <div className="text-sm font-medium text-gray-900">cindy_col</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">Private Stream With Lee</div>
+                    <div className="text-sm text-gray-900">Private Stream With Cindy</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">May 30th, 2025</div>
@@ -353,12 +353,12 @@ const StreamDashboard = () => {
                         <img src={leeImage} alt="Lee" className="w-full h-full object-cover" />
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">goth__egg</div>
+                        <div className="text-sm font-medium text-gray-900">cindy_col</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">Premium Content With Lee</div>
+                    <div className="text-sm text-gray-900">Premium Content With Cindy</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">June 7, 2025</div>
@@ -376,12 +376,12 @@ const StreamDashboard = () => {
                         <img src={leeImage} alt="Lee" className="w-full h-full object-cover" />
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">goth__egg</div>
+                        <div className="text-sm font-medium text-gray-900">cindy_col</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">Monthly Update About Lee</div>
+                    <div className="text-sm text-gray-900">Monthly Update About Cindy</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">June 30, 2025</div>

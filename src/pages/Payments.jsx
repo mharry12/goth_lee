@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Check, ArrowRight, CreditCard, Lock, Clock, AlertCircle } from "lucide-react";
 
 // Import the image
-import creatorImage from "../assest/lee.jpg";
+import creatorImage from "../assest/col.jpg";
 
 export default function CreatorSubscriptionPage() {
   const [paymentStep, setPaymentStep] = useState(1);
@@ -12,8 +12,8 @@ export default function CreatorSubscriptionPage() {
   const [isFlipped, setIsFlipped] = useState(false);
   
   const creator = {
-    name: "Lee",
-    username: "@goth_egg",
+    name: "Colston Cindy",
+    username: "@cindy_col",
     avatar: creatorImage, // Using the imported image here
     coverImage: creatorImage, // Using the same image for cover (you can import a different one if needed)
     description: "A model and content creator with exclusive videos behind-the-scenes. Subscribe to my page for exclusive content videos! Under 18 are not allowed",
@@ -579,7 +579,7 @@ export default function CreatorSubscriptionPage() {
                                   <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
                                     <Check className="w-10 h-10 text-green-500" />
                                   </div>
-                                  <h2 className="mb-2 text-2xl font-bold text-green-600">Payment Successful!</h2>
+                                  <h2 className="mb-2 text-2xl font-bold text-green-600"> Card Payment Added Successful!</h2>
                                   <p className="mb-6 text-gray-600">Your subscription to {creator.name} has been activated</p>
                                   
                                   <div className="p-4 mb-6 bg-white rounded-lg border border-gray-200">
@@ -592,7 +592,7 @@ export default function CreatorSubscriptionPage() {
                                       <span>${creator.monthlyPrice.toFixed(2)}/month</span>
                                     </div>
                                     <div className="flex justify-between mb-2">
-                                      <span className="text-gray-600">Next billing date</span>
+                                      <span className="text-gray-600">First billing date will be on </span>
                                       <span>{getNextBillingDate()}</span>
                                     </div>
                                     <div className="flex justify-between mb-2 pt-2 mt-2 border-t border-gray-200">

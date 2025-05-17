@@ -56,8 +56,8 @@ export default function SideNav() {
         `}
       >
         {/* Header */}
-        <div className="p-4 flex items-center justify-between border-b border-gray-700">
-          <h1 className="text-xl font-bold">Stream With Lee</h1>
+        <div className="p-4 flex items-center justify-between border-b border-gray-900">
+          <h1 className="text-xl text-white font-bold">Stream With Cindy</h1>
           <button onClick={toggleSidebar} className="p-2 rounded hover:bg-gray-700">
             <X size={20} />
           </button>
@@ -149,14 +149,14 @@ export default function SideNav() {
       </div>
       
       {/* Header with toggle button */}
-      <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-10 flex items-center px-4">
+      <div className="fixed top-0 left-0 right-0 h-14 bg-slate-950 shadow-sm z-10 flex items-center px-4">
         <button 
           onClick={toggleSidebar}
-          className="p-2 rounded hover:bg-gray-100"
+          className="p-2 rounded text-white hover:bg-gray-600"
         >
           <Menu size={24} />
         </button>
-        <h1 className="ml-4 font-bold text-lg">Stream With Lee</h1>
+        <h1 className="ml-4 font-bold text-white text-lg">Stream With Cindy</h1>
       </div>
       
       {/* Main Content - Full width with Outlet for React Router */}
