@@ -7,6 +7,7 @@ import AuthPages from './pages/Login';
 import PaymentMethodForm from './pages/Payments';
 import SubscriptionPlans from './pages/Sub';
 import WelcomeStream from './pages/Message';
+import CreatorContentPage from './pages/Contest';
 
 // Authentication check function
 const isAuthenticated = () => {
@@ -37,6 +38,9 @@ function App() {
           <Route path="sub" element={<SubscriptionPlans />} />
           <Route path="payment" element={<PaymentMethodForm />} />
           <Route path="message" element={<WelcomeStream />} />
+          <Route path="context" element={<CreatorContentPage/>} />
+
+          
         </Route>
       </Route>
 

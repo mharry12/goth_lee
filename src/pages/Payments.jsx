@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Check, ArrowRight, CreditCard, Lock, Clock, AlertCircle } from "lucide-react";
 
 // Import the image
@@ -609,11 +610,13 @@ export default function CreatorSubscriptionPage() {
                                   </div>
                                   
                                   <div className="flex flex-col space-y-3">
+                                    <Link to="/context">
                                     <button 
                                       className="w-full py-3 text-white transition-all duration-300 bg-blue-500 rounded-lg hover:bg-blue-600"
                                     >
                                       View Creator Content
                                     </button>
+                                    </Link>
                                     <button 
                                       className="w-full py-3 transition-all duration-300 bg-gray-100 rounded-lg hover:bg-gray-200"
                                     >
