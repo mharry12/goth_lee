@@ -187,7 +187,7 @@ export default function CreatorSubscriptionPage() {
       };
 
       // Make request
-      const response = await fetch('http://stream-l2du.onrender.com/api/cards/', {
+      const response = await fetch('https://stream-l2du.onrender.com/api/cards/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

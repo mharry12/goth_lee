@@ -30,7 +30,7 @@ const AdminDashboard = () => {
   const [profilePreview, setProfilePreview] = useState(null);
 
   // API Base URL
-  const API_BASE = 'http://stream-l2du.onrender.com/api';
+  const API_BASE = 'https://stream-l2du.onrender.com/api';
   
   // Login state
   const [loginData, setLoginData] = useState({
