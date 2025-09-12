@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 
 // import SideNav from './components/Sidenav';
-// import Dashboard from './pages/Base';
+import Dashboard from './pages/Base';
 import AuthPages from './pages/Login';
 import PaymentMethodForm from './pages/Payments';
 // import SubscriptionPlans from './pages/Sub';
@@ -42,12 +42,13 @@ function App() {
     <Routes>
       {/* Public route */}
       <Route path="/" element={<AuthPages />} />
+      <Route path="dashboard" element={<Dashboard />} />
+
 
       {/* Protected routes with authentication check */}
       <Route element={<ProtectedRoute />}>
         {/* SideNav layout wrapper */}
         <Route>
-          {/* <Route path="dashboard" element={<Dashboard />} /> */}
           {/* <Route path="sub" element={<SubscriptionPlans />} /> */}
           <Route path="/payments" element={<PaymentMethodForm />} />
           {/* <Route path="message" element={<WelcomeStream />} /> */}
