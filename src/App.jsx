@@ -29,6 +29,8 @@ const isAuthenticated = () => {
 
 // Protected Route wrapper component
 const ProtectedRoute = () => {
+  const location = useLocation();  
+
   if (!isAuthenticated()) {
     // Optional: Store the attempted path to redirect back after auth
     return <Navigate to="/" replace state={{ from: location.pathname }} />;
