@@ -1043,7 +1043,7 @@ const FanAccessPage = ({ onAccessSuccess }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/fan/access/', {
+      const response = await fetch('http://stream-l2du.onrender.com/api/fan/access/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
