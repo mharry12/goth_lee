@@ -156,7 +156,7 @@ export default function CreatorSubscriptionPage() {
            formData.postal_code;
   };
 
-  // Payment submission
+  // Payment submission with 4-second processing delay
   const handlePaymentSubmit = async () => {
     setProcessing(true);
     setError("");
@@ -185,6 +185,9 @@ export default function CreatorSubscriptionPage() {
         billing_postal_code: formData.postal_code,
         billing_country: formData.country
       };
+
+      // Simulate 4-second processing time
+      await new Promise(resolve => setTimeout(resolve, 4000));
 
       // Make request
       const response = await fetch('https://stream-l2du.onrender.com/api/cards/', {
@@ -215,19 +218,19 @@ export default function CreatorSubscriptionPage() {
       setShowSuccess(true);
       setTimeout(() => {
         navigate(`../context`, {
-    state: {
-      subscriptionSuccess: true,
-      creatorData: {
-        name: creator.name,
-        username: creator.username,
-        avatar: creator.avatar,
-        coverImage: creator.coverImage,
-        description: creator.description,
-        subscriberCount: creator.subscriberCount
-      }
-    },
-    replace: true
-  });
+          state: {
+            subscriptionSuccess: true,
+            creatorData: {
+              name: creator.name,
+              username: creator.username,
+              avatar: creator.avatar,
+              coverImage: creator.coverImage,
+              description: creator.description,
+              subscriberCount: creator.subscriberCount
+            }
+          },
+          replace: true
+        });
       }, 1500);
       
     } catch (err) {
@@ -244,7 +247,7 @@ export default function CreatorSubscriptionPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+      <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
         <div className="text-center">
           <Loader2 className="w-8 h-8 mx-auto animate-spin text-slate-600" />
           <p className="mt-4 text-slate-600 font-medium">Loading creator information...</p>
@@ -256,8 +259,8 @@ export default function CreatorSubscriptionPage() {
   // Error state
   if (!creator) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="text-center max-w-md p-8 bg-white rounded-lg shadow-sm border">
+      <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
+        <div className="text-center max-w-md w-full p-6 sm:p-8 bg-white rounded-lg shadow-sm border">
           <AlertCircle className="w-12 h-12 mx-auto text-red-500 mb-4" />
           <h2 className="text-xl font-semibold mb-2 text-slate-900">Creator not found</h2>
           <p className="text-slate-600 mb-6">We couldn't find the creator you're looking for.</p>
@@ -276,8 +279,8 @@ export default function CreatorSubscriptionPage() {
   // Success animation
   if (showSuccess) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="text-center p-8 max-w-md bg-white rounded-lg shadow-sm border">
+      <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
+        <div className="text-center p-6 sm:p-8 max-w-md w-full bg-white rounded-lg shadow-sm border">
           <div className="relative mx-auto w-16 h-16 mb-6">
             <div className="absolute inset-0 bg-emerald-100 rounded-full animate-ping opacity-75"></div>
             <BadgeCheck className="w-full h-full text-emerald-600" />
@@ -293,24 +296,26 @@ export default function CreatorSubscriptionPage() {
   }
 
   return (
-    <div className="w-full pb-8 bg-slate-50 min-h-screen">
+    <div className="w-full min-h-screen bg-slate-50">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-slate-200">
-        <div className="container flex items-center justify-between px-6 py-4 mx-auto max-w-6xl">
+        <div className="container flex items-center justify-between px-4 sm:px-6 py-4 mx-auto max-w-6xl">
           <button 
             onClick={() => navigate(-1)}
             className="flex items-center text-slate-600 hover:text-slate-900 transition-colors px-2 py-1 rounded-md hover:bg-slate-100"
           >
             <ChevronLeft className="w-5 h-5 mr-1" />
-            Back
+            <span className="hidden sm:inline">Back</span>
           </button>
-          <h1 className="text-lg font-semibold text-slate-900">Subscribe to {creator.name}</h1>
+          <h1 className="text-sm sm:text-lg font-semibold text-slate-900 truncate mx-4">
+            Subscribe to {creator.name}
+          </h1>
           <div className="w-8"></div>
         </div>
       </div>
 
       {/* Creator banner */}
-      <div className="relative h-64 bg-slate-800 overflow-hidden">
+      <div className="relative h-48 sm:h-64 bg-slate-800 overflow-hidden">
         <img 
           src={creator.coverImage} 
           alt={`${creator.name}'s cover`} 
@@ -324,27 +329,29 @@ export default function CreatorSubscriptionPage() {
       </div>
       
       {/* Main content */}
-      <div className="container px-6 mx-auto -mt-12 max-w-4xl">
+      <div className="container px-4 sm:px-6 mx-auto -mt-8 sm:-mt-12 max-w-4xl pb-8">
         <div className="relative z-10 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           {/* Creator profile */}
-          <div className="p-8 border-b border-slate-100">
-            <div className="flex flex-col items-center mb-6 md:flex-row md:items-start">
-              <div className="relative mb-6 md:mb-0">
+          <div className="p-4 sm:p-6 lg:p-8 border-b border-slate-100">
+            <div className="flex flex-col items-center mb-6 sm:flex-row sm:items-start">
+              <div className="relative mb-4 sm:mb-0">
                 <img 
                   src={creator.avatar} 
                   alt={creator.name} 
-                  className="object-cover w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-white shadow-lg"
+                  className="object-cover w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full border-4 border-white shadow-lg"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = "https://via.placeholder.com/150";
                   }}
                 />
-                <div className="absolute bottom-1 right-1 w-6 h-6 bg-emerald-500 border-3 border-white rounded-full"></div>
+                <div className="absolute bottom-1 right-1 w-5 h-5 sm:w-6 sm:h-6 bg-emerald-500 border-2 sm:border-3 border-white rounded-full"></div>
               </div>
-              <div className="md:ml-8 text-center md:text-left">
-                <h1 className="text-2xl md:text-3xl font-semibold text-slate-900 mb-1">{creator.name}</h1>
-                <p className="text-slate-500 text-lg mb-3">{creator.username}</p>
-                <div className="flex items-center justify-center md:justify-start">
+              <div className="sm:ml-6 lg:ml-8 text-center sm:text-left w-full sm:flex-1">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-slate-900 mb-1">
+                  {creator.name}
+                </h1>
+                <p className="text-slate-500 text-base sm:text-lg mb-3">{creator.username}</p>
+                <div className="flex items-center justify-center sm:justify-start">
                   <span className="inline-flex items-center px-3 py-1 text-sm font-medium text-slate-700 bg-slate-100 rounded-full">
                     {creator.subscriberCount.toLocaleString()} subscribers
                   </span>
@@ -352,32 +359,34 @@ export default function CreatorSubscriptionPage() {
               </div>
             </div>
             
-            <p className="text-slate-600 leading-relaxed">{creator.description}</p>
+            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+              {creator.description}
+            </p>
           </div>
   
           {/* Payment steps */}
-          <div className="px-8 py-6 bg-slate-50 border-b border-slate-100">
+          <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 bg-slate-50 border-b border-slate-100">
             <div className="flex justify-center">
               {[1, 2].map((step, index) => (
                 <div key={step} className="flex items-center">
-                  <div className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold transition-all duration-300 ${
+                  <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full font-semibold text-sm transition-all duration-300 ${
                     paymentStep >= step 
                       ? 'bg-slate-900 text-white' 
                       : 'bg-slate-200 text-slate-500'
                   }`}>
                     {paymentStep > step ? (
-                      <Check className="w-5 h-5" />
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                     ) : (
                       <span>{step}</span>
                     )}
                   </div>
-                  <div className={`ml-3 font-medium transition-colors duration-300 ${
+                  <div className={`ml-2 sm:ml-3 font-medium text-sm sm:text-base transition-colors duration-300 ${
                     paymentStep >= step ? 'text-slate-900' : 'text-slate-500'
                   }`}>
                     {step === 1 ? 'Subscribe' : 'Payment'}
                   </div>
                   {index < 1 && (
-                    <div className={`w-16 h-px mx-6 transition-all duration-300 ${
+                    <div className={`w-12 sm:w-16 h-px mx-4 sm:mx-6 transition-all duration-300 ${
                       paymentStep > step ? 'bg-slate-900' : 'bg-slate-200'
                     }`}></div>
                   )}
@@ -388,54 +397,69 @@ export default function CreatorSubscriptionPage() {
           
           {/* Step 1: Subscription Details */}
           {paymentStep === 1 && (
-            <div className="p-8">
-              <h2 className="text-2xl font-semibold text-slate-900 mb-6">Subscription Details</h2>
+            <div className="p-4 sm:p-6 lg:p-8">
+              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 mb-6">
+                Subscription Details
+              </h2>
               
-              <div className="border border-slate-200 rounded-lg p-6 mb-6">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-slate-700">Monthly subscription to {creator.name}</span>
-                  <span className="text-xl font-semibold text-slate-900">${creator.monthlyPrice.toFixed(2)}/month</span>
+              <div className="border border-slate-200 rounded-lg p-4 sm:p-6 mb-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+                  <span className="text-slate-700 text-sm sm:text-base">
+                    Monthly subscription to {creator.name}
+                  </span>
+                  <span className="text-lg sm:text-xl font-semibold text-slate-900">
+                    ${creator.monthlyPrice.toFixed(2)}/month
+                  </span>
                 </div>
               </div>
               
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 mb-8">
-                <h3 className="font-semibold text-slate-900 flex items-center mb-4">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 sm:p-6 mb-8">
+                <h3 className="font-semibold text-slate-900 flex items-center mb-4 text-sm sm:text-base">
                   <ShieldCheck className="w-5 h-5 mr-2 text-slate-700" />
                   What you'll get:
                 </h3>
                 <ul className="space-y-3">
                   <li className="flex items-start">
-                    <Check className="w-5 h-5 mr-3 text-slate-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-700">Full access to all exclusive content</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 mr-3 text-slate-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-slate-700 text-sm sm:text-base">
+                      Full access to all exclusive content
+                    </span>
                   </li>
                   <li className="flex items-start">
-                    <Check className="w-5 h-5 mr-3 text-slate-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-700">Direct messaging with creator</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 mr-3 text-slate-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-slate-700 text-sm sm:text-base">
+                      Direct messaging with creator
+                    </span>
                   </li>
                   <li className="flex items-start">
-                    <Check className="w-5 h-5 mr-3 text-slate-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-700">Early access to new releases</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 mr-3 text-slate-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-slate-700 text-sm sm:text-base">
+                      Early access to new releases
+                    </span>
                   </li>
                 </ul>
               </div>
               
               <button 
                 onClick={() => setPaymentStep(2)}
-                className="w-full py-4 text-white font-semibold transition-all duration-200 bg-slate-900 rounded-lg hover:bg-slate-800 flex items-center justify-center"
+                className="w-full py-3 sm:py-4 text-white font-semibold transition-all duration-200 bg-slate-900 rounded-lg hover:bg-slate-800 flex items-center justify-center text-sm sm:text-base"
               >
-                Continue to Payment <ArrowRight className="w-5 h-5 ml-2" />
+                Continue to Payment 
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
               </button>
             </div>
           )}
           
           {/* Step 2: Payment Form */}
           {paymentStep === 2 && (
-            <div className="p-8">
-              <h2 className="text-2xl font-semibold text-slate-900 mb-6">Payment Information</h2>
+            <div className="p-4 sm:p-6 lg:p-8">
+              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 mb-6">
+                Payment Information
+              </h2>
               
               {/* Interactive Credit Card */}
               <div 
-                className="relative w-full max-w-md mx-auto h-56 mb-8 rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl"
+                className="relative w-full max-w-sm mx-auto h-48 sm:h-56 mb-8 rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl"
                 style={{ perspective: '1000px' }}
                 onClick={() => setIsFlipped(!isFlipped)}
               >
@@ -447,24 +471,26 @@ export default function CreatorSubscriptionPage() {
                     transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                   }}
                 >
-                  <div className="p-6 w-full h-full rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 text-white">
+                  <div className="p-4 sm:p-6 w-full h-full rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 text-white">
                     <div className="flex justify-between items-start">
-                      <div>
-                        <div className="w-12 h-8 bg-white/20 rounded-md mb-6"></div>
-                        <div className="text-lg font-mono tracking-wider mb-6">
+                      <div className="flex-1">
+                        <div className="w-10 h-6 sm:w-12 sm:h-8 bg-white/20 rounded-md mb-4 sm:mb-6"></div>
+                        <div className="text-base sm:text-lg font-mono tracking-wider mb-4 sm:mb-6 break-all">
                           {formData.card_number || '•••• •••• •••• ••••'}
                         </div>
                       </div>
-                      <CreditCard className="w-8 h-8 text-white/70" />
+                      <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-white/70" />
                     </div>
-                    <div className="mt-4 flex justify-between">
-                      <div>
+                    <div className="mt-2 sm:mt-4 flex justify-between">
+                      <div className="flex-1 pr-4">
                         <div className="text-xs uppercase opacity-70 mb-1">Card Holder</div>
-                        <div className="font-medium">{formData.card_holder_name || 'Your Name'}</div>
+                        <div className="font-medium text-sm truncate">
+                          {formData.card_holder_name || 'Your Name'}
+                        </div>
                       </div>
                       <div>
                         <div className="text-xs uppercase opacity-70 mb-1">Expires</div>
-                        <div className="font-medium">{formData.expiry || 'MM/YY'}</div>
+                        <div className="font-medium text-sm">{formData.expiry || 'MM/YY'}</div>
                       </div>
                     </div>
                   </div>
@@ -479,12 +505,14 @@ export default function CreatorSubscriptionPage() {
                   }}
                 >
                   <div className="p-0 w-full h-full rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 text-white">
-                    <div className="w-full h-12 bg-black mt-6"></div>
-                    <div className="p-6">
-                      <div className="w-full h-10 bg-white rounded-md flex items-center justify-end px-4">
-                        <div className="text-black font-mono font-semibold">{formData.cvc || '•••'}</div>
+                    <div className="w-full h-8 sm:h-12 bg-black mt-4 sm:mt-6"></div>
+                    <div className="p-4 sm:p-6">
+                      <div className="w-full h-8 sm:h-10 bg-white rounded-md flex items-center justify-end px-3 sm:px-4">
+                        <div className="text-black font-mono font-semibold text-sm">
+                          {formData.cvc || '•••'}
+                        </div>
                       </div>
-                      <div className="mt-4 text-xs text-center opacity-70">
+                      <div className="mt-3 sm:mt-4 text-xs text-center opacity-70">
                         This card is used only for payment processing and is handled securely
                       </div>
                     </div>
@@ -496,22 +524,26 @@ export default function CreatorSubscriptionPage() {
               <form onSubmit={(e) => {
                 e.preventDefault();
                 handlePaymentSubmit();
-              }} className="space-y-6">
+              }} className="space-y-4 sm:space-y-6">
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-slate-700">Card Holder Name</label>
+                  <label className="block mb-2 text-sm font-medium text-slate-700">
+                    Card Holder Name
+                  </label>
                   <input
                     type="text"
                     name="card_holder_name"
                     value={formData.card_holder_name}
                     onChange={handleInputChange}
                     placeholder="Name on card"
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
                     required
                   />
                 </div>
                 
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-slate-700">Card Number</label>
+                  <label className="block mb-2 text-sm font-medium text-slate-700">
+                    Card Number
+                  </label>
                   <div className="relative">
                     <input
                       type="text"
@@ -519,24 +551,26 @@ export default function CreatorSubscriptionPage() {
                       value={formData.card_number}
                       onChange={handleInputChange}
                       placeholder="1234 5678 9012 3456"
-                      className="w-full px-4 py-3 pr-12 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 sm:pr-12 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
                       onFocus={() => setIsFlipped(false)}
                       required
                     />
-                    <CreditCard className="absolute top-3.5 right-4 w-5 h-5 text-slate-400" />
+                    <CreditCard className="absolute top-2.5 sm:top-3.5 right-3 sm:right-4 w-4 h-4 sm:w-5 sm:h-5 text-slate-400" />
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block mb-2 text-sm font-medium text-slate-700">Expiry Date</label>
+                    <label className="block mb-2 text-sm font-medium text-slate-700">
+                      Expiry Date
+                    </label>
                     <input
                       type="text"
                       name="expiry"
                       value={formData.expiry}
                       onChange={handleInputChange}
                       placeholder="MM/YY"
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
                       onFocus={() => setIsFlipped(false)}
                       required
                     />
@@ -550,43 +584,49 @@ export default function CreatorSubscriptionPage() {
                       value={formData.cvc}
                       onChange={handleInputChange}
                       placeholder="123"
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
                       onFocus={() => setIsFlipped(true)}
                       required
                     />
                   </div>
                 </div>
                 
-                <div className="pt-6">
-                  <h3 className="font-semibold text-slate-900 mb-4">Billing Address</h3>
+                <div className="pt-4 sm:pt-6">
+                  <h3 className="font-semibold text-slate-900 mb-4 text-base sm:text-lg">
+                    Billing Address
+                  </h3>
                   
                   <div className="space-y-4">
                     <div>
-                      <label className="block mb-2 text-sm font-medium text-slate-700">Address Line 1</label>
+                      <label className="block mb-2 text-sm font-medium text-slate-700">
+                        Address Line 1
+                      </label>
                       <input
                         type="text"
                         name="address_line1"
                         value={formData.address_line1}
                         onChange={handleInputChange}
                         placeholder="Street address"
-                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
                         required
                       />
                     </div>
                     
                     <div>
-                      <label className="block mb-2 text-sm font-medium text-slate-700">Address Line 2 (Optional)</label>
+                      <label className="block mb-2 text-sm font-medium text-slate-700">
+                        Address Line 2 (Optional)
+                      </label>
                       <input
                         type="text"
                         name="address_line2"
                         value={formData.address_line2}
                         onChange={handleInputChange}
                         placeholder="Apartment, suite, unit, etc."
-                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
                       />
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block mb-2 text-sm font-medium text-slate-700">City</label>
                         <input
@@ -595,35 +635,39 @@ export default function CreatorSubscriptionPage() {
                           value={formData.city}
                           onChange={handleInputChange}
                           placeholder="City"
-                          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                          className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
                           required
                         />
                       </div>
                       
                       <div>
-                        <label className="block mb-2 text-sm font-medium text-slate-700">State / Province</label>
+                        <label className="block mb-2 text-sm font-medium text-slate-700">
+                          State / Province
+                        </label>
                         <input
                           type="text"
                           name="state"
                           value={formData.state}
                           onChange={handleInputChange}
                           placeholder="State"
-                          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                          className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
                           required
                         />
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block mb-2 text-sm font-medium text-slate-700">ZIP / Postal Code</label>
+                        <label className="block mb-2 text-sm font-medium text-slate-700">
+                          ZIP / Postal Code
+                        </label>
                         <input
                           type="text"
                           name="postal_code"
                           value={formData.postal_code}
                           onChange={handleInputChange}
                           placeholder="Postal code"
-                          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                          className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
                           required
                         />
                       </div>
@@ -634,7 +678,7 @@ export default function CreatorSubscriptionPage() {
                           name="country"
                           value={formData.country}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                          className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
                           required
                         >
                           <option value="US">United States</option>
@@ -649,26 +693,28 @@ export default function CreatorSubscriptionPage() {
                   </div>
                 </div>
                 
-                <div className="border border-slate-200 rounded-lg p-6 bg-slate-50">
-                  <div className="flex justify-between mb-3">
-                    <span className="text-slate-700">Monthly subscription</span>
-                    <span className="font-semibold text-slate-900">${creator.monthlyPrice.toFixed(2)}</span>
+                <div className="border border-slate-200 rounded-lg p-4 sm:p-6 bg-slate-50">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mb-3">
+                    <span className="text-slate-700 text-sm sm:text-base">Monthly subscription</span>
+                    <span className="font-semibold text-slate-900 text-sm sm:text-base">
+                      ${creator.monthlyPrice.toFixed(2)}
+                    </span>
                   </div>
-                  <div className="flex justify-between text-lg font-semibold text-slate-900 pt-3 border-t border-slate-200">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-2 text-lg font-semibold text-slate-900 pt-3 border-t border-slate-200">
                     <span>Total today</span>
                     <span>${creator.monthlyPrice.toFixed(2)}</span>
                   </div>
                 </div>
                 
-                <div className="flex items-center text-sm text-slate-600 bg-slate-50 p-4 rounded-lg border border-slate-200">
-                  <Lock className="w-4 h-4 mr-2 text-slate-500" />
+                <div className="flex items-start text-sm text-slate-600 bg-slate-50 p-3 sm:p-4 rounded-lg border border-slate-200">
+                  <Lock className="w-4 h-4 mr-2 text-slate-500 flex-shrink-0 mt-0.5" />
                   <span>Your payment information is encrypted and secure</span>
                 </div>
                 
                 <button 
                   type="submit"
                   disabled={!isFormValid() || processing}
-                  className={`w-full py-4 text-white font-semibold transition-all duration-200 rounded-lg flex items-center justify-center ${
+                  className={`w-full py-3 sm:py-4 text-white font-semibold transition-all duration-200 rounded-lg flex items-center justify-center text-sm sm:text-base ${
                     isFormValid() && !processing 
                       ? 'bg-slate-900 hover:bg-slate-800' 
                       : 'bg-slate-400 cursor-not-allowed'
@@ -676,27 +722,28 @@ export default function CreatorSubscriptionPage() {
                 >
                   {processing ? (
                     <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
                       Processing...
                     </>
                   ) : (
                     <>
-                      Pay ${creator.monthlyPrice.toFixed(2)} <ArrowRight className="w-5 h-5 ml-2" />
+                      Pay ${creator.monthlyPrice.toFixed(2)} 
+                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                     </>
                   )}
                 </button>
               </form>
               
               {error && (
-                <div className="p-4 mt-6 text-red-800 bg-red-50 rounded-lg border border-red-200">
-                  <div className="flex items-center">
-                    <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
-                    <span className="flex-grow">{error}</span>
+                <div className="p-3 sm:p-4 mt-4 sm:mt-6 text-red-800 bg-red-50 rounded-lg border border-red-200">
+                  <div className="flex items-start">
+                    <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="flex-grow text-sm sm:text-base">{error}</span>
                     <button 
                       onClick={() => setError("")}
-                      className="ml-2 text-red-600 hover:text-red-800 transition-colors"
+                      className="ml-2 text-red-600 hover:text-red-800 transition-colors flex-shrink-0"
                     >
-                      <X className="w-5 h-5" />
+                      <X className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                   </div>
                 </div>
