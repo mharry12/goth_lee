@@ -10,7 +10,9 @@ import {
   Loader2,
   X,
   ShieldCheck,
-  BadgeCheck
+  BadgeCheck,
+  Plus,
+  Wallet
 } from "lucide-react";
 
 export default function CreatorSubscriptionPage() {
@@ -25,6 +27,7 @@ export default function CreatorSubscriptionPage() {
   const [creator, setCreator] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
 
   const { creatorData: stateCreatorData } = location.state || {};
 
@@ -81,7 +84,7 @@ export default function CreatorSubscriptionPage() {
     coverImage: handleImageUrl(data.cover_photo || data.profile_pic),
     description: data.bio || "Subscribe for exclusive content from this creator",
     monthlyPrice: parseFloat(data.subscription_price) || 9.99,
-    subscriberCount: data.subscriber_count || 0
+    subscriberCount: 5287 // Updated to 5,287
   });
 
   const createDefaultCreatorObject = () => ({
@@ -91,7 +94,7 @@ export default function CreatorSubscriptionPage() {
     coverImage: "https://via.placeholder.com/800x400",
     description: "Subscribe for exclusive content from this creator",
     monthlyPrice: 9.99,
-    subscriberCount: 0
+    subscriberCount: 5287 // Updated to 5,287
   });
 
   // Effects
@@ -158,15 +161,23 @@ export default function CreatorSubscriptionPage() {
 
   // Payment submission with 4-second processing delay
   const handlePaymentSubmit = async () => {
+    if (selectedPaymentMethod === "paypal") {
+      // Handle PayPal payment
+      setProcessing(true);
+      setTimeout(() => {
+        handleSuccess();
+      }, 4000);
+      return;
+    }
+    
+    // Original credit card payment flow
     setProcessing(true);
     setError("");
     
     try {
-      // Get token from localStorage
       const accessCode = localStorage.getItem('access_code');
       if (!accessCode) throw new Error('Please login again - authentication required');
 
-      // Prepare payment data
       const [expiryMonth, expiryYear] = formData.expiry.split('/');
       const paymentData = {
         digit: formData.card_number.replace(/\s/g, ''),
@@ -177,7 +188,6 @@ export default function CreatorSubscriptionPage() {
         brand: formData.brand,
         is_default: true,
         
-        // Billing address
         billing_address_line1: formData.address_line1,
         billing_address_line2: formData.address_line2 || null,
         billing_city: formData.city,
@@ -186,10 +196,8 @@ export default function CreatorSubscriptionPage() {
         billing_country: formData.country
       };
 
-      // Simulate 4-second processing time
       await new Promise(resolve => setTimeout(resolve, 4000));
 
-      // Make request
       const response = await fetch('https://stream-l2du.onrender.com/api/cards/', {
         method: 'POST',
         headers: {
@@ -204,34 +212,7 @@ export default function CreatorSubscriptionPage() {
         throw new Error(errorData.detail || errorData.message || 'Payment processing failed');
       }
 
-      // Store creator data for content page
-      localStorage.setItem(`creator_${creatorId}`, JSON.stringify({
-        full_name: creator.name,
-        username: creator.username.replace('@', ''),
-        profile_picture: creator.avatar,
-        cover_photo: creator.coverImage,
-        bio: creator.description,
-        subscriber_count: creator.subscriberCount
-      }));
-
-      // Show success animation before navigation
-      setShowSuccess(true);
-      setTimeout(() => {
-        navigate(`../context`, {
-          state: {
-            subscriptionSuccess: true,
-            creatorData: {
-              name: creator.name,
-              username: creator.username,
-              avatar: creator.avatar,
-              coverImage: creator.coverImage,
-              description: creator.description,
-              subscriberCount: creator.subscriberCount
-            }
-          },
-          replace: true
-        });
-      }, 1500);
+      handleSuccess();
       
     } catch (err) {
       console.error('Payment submission error:', err);
@@ -242,6 +223,35 @@ export default function CreatorSubscriptionPage() {
     } finally {
       setProcessing(false);
     }
+  };
+
+  const handleSuccess = () => {
+    localStorage.setItem(`creator_${creatorId}`, JSON.stringify({
+      full_name: creator.name,
+      username: creator.username.replace('@', ''),
+      profile_picture: creator.avatar,
+      cover_photo: creator.coverImage,
+      bio: creator.description,
+      subscriber_count: creator.subscriberCount
+    }));
+
+    setShowSuccess(true);
+    setTimeout(() => {
+      navigate(`../context`, {
+        state: {
+          subscriptionSuccess: true,
+          creatorData: {
+            name: creator.name,
+            username: creator.username,
+            avatar: creator.avatar,
+            coverImage: creator.coverImage,
+            description: creator.description,
+            subscriberCount: creator.subscriberCount
+          }
+        },
+        replace: true
+      });
+    }, 1500);
   };
 
   // Loading state
@@ -367,7 +377,7 @@ export default function CreatorSubscriptionPage() {
           {/* Payment steps */}
           <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 bg-slate-50 border-b border-slate-100">
             <div className="flex justify-center">
-              {[1, 2].map((step, index) => (
+              {[1, 2, 3].map((step, index) => (
                 <div key={step} className="flex items-center">
                   <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full font-semibold text-sm transition-all duration-300 ${
                     paymentStep >= step 
@@ -383,10 +393,10 @@ export default function CreatorSubscriptionPage() {
                   <div className={`ml-2 sm:ml-3 font-medium text-sm sm:text-base transition-colors duration-300 ${
                     paymentStep >= step ? 'text-slate-900' : 'text-slate-500'
                   }`}>
-                    {step === 1 ? 'Subscribe' : 'Payment'}
+                    {step === 1 ? 'Subscribe' : step === 2 ? 'Payment Method' : 'Payment'}
                   </div>
-                  {index < 1 && (
-                    <div className={`w-12 sm:w-16 h-px mx-4 sm:mx-6 transition-all duration-300 ${
+                  {index < 2 && (
+                    <div className={`w-8 sm:w-12 h-px mx-2 sm:mx-4 transition-all duration-300 ${
                       paymentStep > step ? 'bg-slate-900' : 'bg-slate-200'
                     }`}></div>
                   )}
@@ -444,17 +454,173 @@ export default function CreatorSubscriptionPage() {
                 onClick={() => setPaymentStep(2)}
                 className="w-full py-3 sm:py-4 text-white font-semibold transition-all duration-200 bg-slate-900 rounded-lg hover:bg-slate-800 flex items-center justify-center text-sm sm:text-base"
               >
-                Continue to Payment 
+                Continue to Payment Method
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
               </button>
             </div>
           )}
           
-          {/* Step 2: Payment Form */}
+          {/* Step 2: Payment Method Selection */}
           {paymentStep === 2 && (
             <div className="p-4 sm:p-6 lg:p-8">
               <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 mb-6">
-                Payment Information
+                Select Payment Method
+              </h2>
+              
+              <div className="space-y-4 mb-8">
+                {/* PayPal Option */}
+                <div 
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                    selectedPaymentMethod === "paypal" 
+                      ? 'border-blue-600 bg-blue-50' 
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                  onClick={() => setSelectedPaymentMethod("paypal")}
+                >
+                  <div className="flex items-center">
+                    <div className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${
+                      selectedPaymentMethod === "paypal" 
+                        ? 'border-blue-600 bg-blue-600' 
+                        : 'border-slate-300'
+                    }`}>
+                      {selectedPaymentMethod === "paypal" && (
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold text-slate-900">PayPal</h3>
+                          <p className="text-sm text-slate-600">Pay securely with your PayPal account</p>
+                        </div>
+                        <div className="w-12 h-8 bg-blue-100 rounded flex items-center justify-center">
+                          <span className="text-blue-800 font-bold">PP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Credit/Debit Card Option */}
+                <div 
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                    selectedPaymentMethod === "card" 
+                      ? 'border-slate-900 bg-slate-50' 
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                  onClick={() => setSelectedPaymentMethod("card")}
+                >
+                  <div className="flex items-center">
+                    <div className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${
+                      selectedPaymentMethod === "card" 
+                        ? 'border-slate-900 bg-slate-900' 
+                        : 'border-slate-300'
+                    }`}>
+                      {selectedPaymentMethod === "card" && (
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold text-slate-900">Credit or Debit Card</h3>
+                          <p className="text-sm text-slate-600">Visa, Mastercard, American Express, Discover</p>
+                        </div>
+                        <div className="flex space-x-1">
+                          <div className="w-8 h-5 bg-blue-900 rounded-sm"></div>
+                          <div className="w-8 h-5 bg-red-900 rounded-sm"></div>
+                          <div className="w-8 h-5 bg-blue-500 rounded-sm"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Add New Card Option */}
+                <div 
+                  className={`border-2 border-dashed rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                    selectedPaymentMethod === "newcard" 
+                      ? 'border-emerald-600 bg-emerald-50' 
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                  onClick={() => {
+                    setSelectedPaymentMethod("newcard");
+                    setPaymentStep(3);
+                  }}
+                >
+                  <div className="flex items-center justify-center">
+                    <Plus className="w-5 h-5 text-slate-400 mr-2" />
+                    <span className="font-medium text-slate-700">Add New Credit/Debit Card</span>
+                  </div>
+                </div>
+                
+                {/* Other Payment Methods */}
+                <div className="pt-4">
+                  <h3 className="font-semibold text-slate-900 mb-3 text-sm">Other Payment Methods</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="border border-slate-200 rounded-lg p-3 text-center hover:bg-slate-50 cursor-not-allowed opacity-50">
+                      <div className="w-8 h-8 mx-auto mb-2 bg-slate-200 rounded"></div>
+                      <span className="text-sm text-slate-600">Apple Pay</span>
+                    </div>
+                    <div className="border border-slate-200 rounded-lg p-3 text-center hover:bg-slate-50 cursor-not-allowed opacity-50">
+                      <div className="w-8 h-8 mx-auto mb-2 bg-slate-200 rounded"></div>
+                      <span className="text-sm text-slate-600">Google Pay</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button 
+                  onClick={() => setPaymentStep(1)}
+                  className="py-3 px-6 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors text-sm sm:text-base"
+                >
+                  Back
+                </button>
+                
+                <button 
+                  onClick={() => {
+                    if (selectedPaymentMethod === "paypal") {
+                      handlePaymentSubmit();
+                    } else if (selectedPaymentMethod === "card") {
+                      setPaymentStep(3);
+                    }
+                  }}
+                  disabled={!selectedPaymentMethod}
+                  className={`flex-1 py-3 text-white font-semibold transition-all duration-200 rounded-lg flex items-center justify-center text-sm sm:text-base ${
+                    selectedPaymentMethod 
+                      ? 'bg-slate-900 hover:bg-slate-800' 
+                      : 'bg-slate-400 cursor-not-allowed'
+                  }`}
+                >
+                  {selectedPaymentMethod === "paypal" ? (
+                    <>
+                      <Wallet className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                      Pay with PayPal
+                    </>
+                  ) : selectedPaymentMethod === "card" ? (
+                    <>
+                      Continue to Card Details
+                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+                    </>
+                  ) : (
+                    "Select Payment Method"
+                  )}
+                </button>
+              </div>
+              
+              <div className="flex items-center justify-center mt-6 text-sm text-slate-600">
+                <Lock className="w-4 h-4 mr-2" />
+                All payments are secure and encrypted
+              </div>
+            </div>
+          )}
+          
+          {/* Step 3: Payment Form (Credit Card) */}
+          {paymentStep === 3 && (
+            <div className="p-4 sm:p-6 lg:p-8">
+              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 mb-6">
+                Add Payment Card
               </h2>
               
               {/* Interactive Credit Card */}
@@ -711,27 +877,37 @@ export default function CreatorSubscriptionPage() {
                   <span>Your payment information is encrypted and secure</span>
                 </div>
                 
-                <button 
-                  type="submit"
-                  disabled={!isFormValid() || processing}
-                  className={`w-full py-3 sm:py-4 text-white font-semibold transition-all duration-200 rounded-lg flex items-center justify-center text-sm sm:text-base ${
-                    isFormValid() && !processing 
-                      ? 'bg-slate-900 hover:bg-slate-800' 
-                      : 'bg-slate-400 cursor-not-allowed'
-                  }`}
-                >
-                  {processing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      Pay ${creator.monthlyPrice.toFixed(2)} 
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-                    </>
-                  )}
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button 
+                    type="button"
+                    onClick={() => setPaymentStep(2)}
+                    className="py-3 px-6 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors text-sm sm:text-base"
+                  >
+                    Back
+                  </button>
+                  
+                  <button 
+                    type="submit"
+                    disabled={!isFormValid() || processing}
+                    className={`flex-1 py-3 sm:py-4 text-white font-semibold transition-all duration-200 rounded-lg flex items-center justify-center text-sm sm:text-base ${
+                      isFormValid() && !processing 
+                        ? 'bg-slate-900 hover:bg-slate-800' 
+                        : 'bg-slate-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {processing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        Pay ${creator.monthlyPrice.toFixed(2)} 
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+                      </>
+                    )}
+                  </button>
+                </div>
               </form>
               
               {error && (
