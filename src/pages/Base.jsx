@@ -445,7 +445,44 @@ const loadCreditCards = async () => {
 // Update all API calls to handle token expiration
 
   // Login Form Component
-  const LoginForm = () => (
+
+  const LoginForm = () => {
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
+  // Use useRef for immediate value access without re-render delay
+  const loginDataRef = useRef(loginData);
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    loginDataRef.current = loginData;
+  }, [loginData]);
+
+  // Optimized handleInputChange
+  const handleInputChange = useCallback((field) => (e) => {
+    const value = e.target.value;
+    
+    // Update state immediately in one go
+    setLoginData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  }, []);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      // Your login logic here
+      console.log('Login data:', loginDataRef.current);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
@@ -466,8 +503,8 @@ const loadCreditCards = async () => {
             <input
               type="email"
               value={loginData.email}
-              onChange={(e) => setLoginData({...loginData, email: e.target.value})}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={handleInputChange('email')}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-150"
               placeholder="admin@example.com"
               required
               disabled={loading}
@@ -482,8 +519,8 @@ const loadCreditCards = async () => {
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={loginData.password}
-                onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+                onChange={handleInputChange('password')}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12 transition-all duration-150"
                 placeholder="Enter your password"
                 required
                 disabled={loading}
@@ -516,6 +553,8 @@ const loadCreditCards = async () => {
       </div>
     </div>
   );
+};
+
 
   // Main Dashboard Component
   const Dashboard = () => (
