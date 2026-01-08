@@ -10,9 +10,8 @@ import {
   Loader2,
   X,
   ShieldCheck,
-  BadgeCheck,
-  Plus,
-  Wallet
+  Sparkles,
+  UserPlus
 } from "lucide-react";
 
 export default function CreatorSubscriptionPage() {
@@ -28,6 +27,7 @@ export default function CreatorSubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   const { creatorData: stateCreatorData } = location.state || {};
 
@@ -45,7 +45,10 @@ export default function CreatorSubscriptionPage() {
     country: "US"
   });
 
-  // Helper functions
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handleImageUrl = (imagePath) => {
     if (!imagePath) return "https://via.placeholder.com/150";
     if (imagePath.startsWith('http')) return imagePath;
@@ -84,20 +87,20 @@ export default function CreatorSubscriptionPage() {
     coverImage: handleImageUrl(data.cover_photo || data.profile_pic),
     description: data.bio || "Subscribe for exclusive content from this creator",
     monthlyPrice: parseFloat(data.subscription_price) || 9.99,
-    subscriberCount: 5287 // Updated to 5,287
+    subscriberCount: data.subscriber_count || 5287
   });
 
   const createDefaultCreatorObject = () => ({
+    id: creatorId,
     name: "Creator",
     username: "@creator",
     avatar: "https://via.placeholder.com/150",
     coverImage: "https://via.placeholder.com/800x400",
     description: "Subscribe for exclusive content from this creator",
     monthlyPrice: 9.99,
-    subscriberCount: 5287 // Updated to 5,287
+    subscriberCount: 5287
   });
 
-  // Effects
   useEffect(() => {
     initializeCreatorData();
   }, [creatorId, stateCreatorData]);
@@ -114,7 +117,6 @@ export default function CreatorSubscriptionPage() {
     setFormData(prev => ({ ...prev, brand }));
   }, [formData.card_number]);
 
-  // Form handling
   const formatCardNumber = (value) => {
     if (!value) return "";
     const digits = value.replace(/\D/g, "");
@@ -159,10 +161,8 @@ export default function CreatorSubscriptionPage() {
            formData.postal_code;
   };
 
-  // Payment submission with 4-second processing delay
   const handlePaymentSubmit = async () => {
     if (selectedPaymentMethod === "paypal") {
-      // Handle PayPal payment
       setProcessing(true);
       setTimeout(() => {
         handleSuccess();
@@ -170,7 +170,6 @@ export default function CreatorSubscriptionPage() {
       return;
     }
     
-    // Original credit card payment flow
     setProcessing(true);
     setError("");
     
@@ -187,7 +186,6 @@ export default function CreatorSubscriptionPage() {
         cvv: formData.cvc,
         brand: formData.brand,
         is_default: true,
-        
         billing_address_line1: formData.address_line1,
         billing_address_line2: formData.address_line2 || null,
         billing_city: formData.city,
@@ -251,34 +249,37 @@ export default function CreatorSubscriptionPage() {
         },
         replace: true
       });
-    }, 1500);
+    }, 2000);
   };
 
-  // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 mx-auto animate-spin text-slate-600" />
-          <p className="mt-4 text-slate-600 font-medium">Loading creator information...</p>
+          <div className="relative w-16 h-16 mx-auto mb-4">
+            <div className="absolute inset-0 border-4 border-slate-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-slate-900 rounded-full border-t-transparent animate-spin"></div>
+          </div>
+          <p className="text-slate-600 font-medium">Loading creator information...</p>
         </div>
       </div>
     );
   }
 
-  // Error state
   if (!creator) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
-        <div className="text-center max-w-md w-full p-6 sm:p-8 bg-white rounded-lg shadow-sm border">
-          <AlertCircle className="w-12 h-12 mx-auto text-red-500 mb-4" />
-          <h2 className="text-xl font-semibold mb-2 text-slate-900">Creator not found</h2>
-          <p className="text-slate-600 mb-6">We couldn't find the creator you're looking for.</p>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-4">
+        <div className={`text-center max-w-md w-full p-8 bg-white rounded-2xl shadow-lg border border-slate-100 transition-all duration-500 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className="w-16 h-16 mx-auto mb-4 bg-red-50 rounded-full flex items-center justify-center">
+            <AlertCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-semibold mb-2 text-slate-900">Creator not found</h2>
+          <p className="text-slate-600 mb-8">We couldn't find the creator you're looking for.</p>
           <button 
             onClick={() => navigate(-1)}
-            className="inline-flex items-center px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium"
+            className="inline-flex items-center px-6 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all duration-200 font-medium shadow-lg shadow-slate-900/10 hover:shadow-xl hover:shadow-slate-900/20 hover:scale-105"
           >
-            <ChevronLeft className="w-4 h-4 mr-2" />
+            <ChevronLeft className="w-5 h-5 mr-2" />
             Go back
           </button>
         </div>
@@ -286,19 +287,23 @@ export default function CreatorSubscriptionPage() {
     );
   }
 
-  // Success animation
   if (showSuccess) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
-        <div className="text-center p-6 sm:p-8 max-w-md w-full bg-white rounded-lg shadow-sm border">
-          <div className="relative mx-auto w-16 h-16 mb-6">
-            <div className="absolute inset-0 bg-emerald-100 rounded-full animate-ping opacity-75"></div>
-            <BadgeCheck className="w-full h-full text-emerald-600" />
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 p-4">
+        <div className={`text-center p-8 max-w-md w-full bg-white rounded-2xl shadow-xl border border-slate-100 transition-all duration-700 ${mounted ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+          <div className="relative mx-auto w-20 h-20 mb-6">
+            <div className="absolute inset-0 bg-emerald-100 rounded-full animate-ping"></div>
+            <div className="relative w-full h-full bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center shadow-lg">
+              <Check className="w-10 h-10 text-white" />
+            </div>
           </div>
-          <h2 className="text-2xl font-semibold text-slate-900 mb-2">Payment Successful</h2>
-          <p className="text-slate-600 mb-6">You're now subscribed to {creator.name}</p>
-          <div className="flex justify-center">
-            <Loader2 className="w-5 h-5 animate-spin text-slate-600" />
+          <h2 className="text-3xl font-bold text-slate-900 mb-2">Payment Successful!</h2>
+          <p className="text-slate-600 mb-2">You're now subscribed to</p>
+          <p className="text-lg font-semibold text-slate-900 mb-8">{creator.name}</p>
+          <div className="flex items-center justify-center space-x-2 text-slate-500">
+            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
           </div>
         </div>
       </div>
@@ -306,16 +311,16 @@ export default function CreatorSubscriptionPage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-slate-50">
+    <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-slate-200">
+      <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-sm">
         <div className="container flex items-center justify-between px-4 sm:px-6 py-4 mx-auto max-w-6xl">
           <button 
             onClick={() => navigate(-1)}
-            className="flex items-center text-slate-600 hover:text-slate-900 transition-colors px-2 py-1 rounded-md hover:bg-slate-100"
+            className="flex items-center text-slate-600 hover:text-slate-900 transition-all duration-200 px-3 py-2 rounded-xl hover:bg-slate-100 group"
           >
-            <ChevronLeft className="w-5 h-5 mr-1" />
-            <span className="hidden sm:inline">Back</span>
+            <ChevronLeft className="w-5 h-5 mr-1 group-hover:-translate-x-1 transition-transform" />
+            <span className="hidden sm:inline font-medium">Back</span>
           </button>
           <h1 className="text-sm sm:text-lg font-semibold text-slate-900 truncate mx-4">
             Subscribe to {creator.name}
@@ -329,75 +334,76 @@ export default function CreatorSubscriptionPage() {
         <img 
           src={creator.coverImage} 
           alt={`${creator.name}'s cover`} 
-          className="object-cover w-full h-full"
+          className="object-cover w-full h-full transition-transform duration-700 hover:scale-105"
           onError={(e) => {
             e.target.onerror = null;
             e.target.src = "https://via.placeholder.com/800x400";
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
       </div>
       
       {/* Main content */}
       <div className="container px-4 sm:px-6 mx-auto -mt-8 sm:-mt-12 max-w-4xl pb-8">
-        <div className="relative z-10 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className={`relative z-10 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           {/* Creator profile */}
-          <div className="p-4 sm:p-6 lg:p-8 border-b border-slate-100">
+          <div className="p-6 sm:p-8 lg:p-10 border-b border-slate-100">
             <div className="flex flex-col items-center mb-6 sm:flex-row sm:items-start">
-              <div className="relative mb-4 sm:mb-0">
+              <div className="relative mb-4 sm:mb-0 group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-slate-600 to-slate-800 rounded-full opacity-75 group-hover:opacity-100 blur transition-all duration-300"></div>
                 <img 
                   src={creator.avatar} 
                   alt={creator.name} 
-                  className="object-cover w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full border-4 border-white shadow-lg"
+                  className="relative object-cover w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full border-4 border-white shadow-xl transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = "https://via.placeholder.com/150";
                   }}
                 />
-                <div className="absolute bottom-1 right-1 w-5 h-5 sm:w-6 sm:h-6 bg-emerald-500 border-2 sm:border-3 border-white rounded-full"></div>
+                <div className="absolute bottom-2 right-2 w-6 h-6 bg-emerald-500 border-3 border-white rounded-full shadow-lg animate-pulse"></div>
               </div>
-              <div className="sm:ml-6 lg:ml-8 text-center sm:text-left w-full sm:flex-1">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-slate-900 mb-1">
+              <div className="sm:ml-8 text-center sm:text-left w-full sm:flex-1">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-2">
                   {creator.name}
                 </h1>
-                <p className="text-slate-500 text-base sm:text-lg mb-3">{creator.username}</p>
-                <div className="flex items-center justify-center sm:justify-start">
-                  <span className="inline-flex items-center px-3 py-1 text-sm font-medium text-slate-700 bg-slate-100 rounded-full">
+                <p className="text-slate-500 text-lg mb-4">{creator.username}</p>
+                <div className="flex items-center justify-center sm:justify-start mt-2 mb-4">
+                  <span className="inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-700 bg-gradient-to-r from-slate-100 to-slate-50 rounded-full shadow-sm border border-slate-200">
+                    <Sparkles className="w-4 h-4 mr-2 text-amber-500" />
                     {creator.subscriberCount.toLocaleString()} subscribers
                   </span>
                 </div>
+                <p className="text-slate-600 leading-relaxed text-base text-center sm:text-left">
+                  {creator.description}
+                </p>
               </div>
             </div>
-            
-            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
-              {creator.description}
-            </p>
           </div>
   
           {/* Payment steps */}
-          <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 bg-slate-50 border-b border-slate-100">
+          <div className="px-6 sm:px-8 py-6 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
             <div className="flex justify-center">
               {[1, 2, 3].map((step, index) => (
                 <div key={step} className="flex items-center">
-                  <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full font-semibold text-sm transition-all duration-300 ${
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold transition-all duration-500 ${
                     paymentStep >= step 
-                      ? 'bg-slate-900 text-white' 
-                      : 'bg-slate-200 text-slate-500'
+                      ? 'bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-lg scale-110' 
+                      : 'bg-slate-200 text-slate-500 scale-100'
                   }`}>
                     {paymentStep > step ? (
-                      <Check className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <Check className="w-5 h-5" />
                     ) : (
                       <span>{step}</span>
                     )}
                   </div>
-                  <div className={`ml-2 sm:ml-3 font-medium text-sm sm:text-base transition-colors duration-300 ${
-                    paymentStep >= step ? 'text-slate-900' : 'text-slate-500'
+                  <div className={`ml-3 font-semibold text-sm transition-all duration-500 ${
+                    paymentStep >= step ? 'text-slate-900' : 'text-slate-400'
                   }`}>
-                    {step === 1 ? 'Subscribe' : step === 2 ? 'Payment Method' : 'Payment'}
+                    {step === 1 ? 'Plan' : step === 2 ? 'Payment' : 'Complete'}
                   </div>
                   {index < 2 && (
-                    <div className={`w-8 sm:w-12 h-px mx-2 sm:mx-4 transition-all duration-300 ${
-                      paymentStep > step ? 'bg-slate-900' : 'bg-slate-200'
+                    <div className={`w-12 h-1 mx-4 rounded-full transition-all duration-500 ${
+                      paymentStep > step ? 'bg-gradient-to-r from-slate-800 to-slate-900' : 'bg-slate-200'
                     }`}></div>
                   )}
                 </div>
@@ -407,94 +413,99 @@ export default function CreatorSubscriptionPage() {
           
           {/* Step 1: Subscription Details */}
           {paymentStep === 1 && (
-            <div className="p-4 sm:p-6 lg:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 mb-6">
+            <div className={`p-6 sm:p-8 lg:p-10 transition-all duration-500 ${paymentStep === 1 ? 'opacity-100' : 'opacity-0'}`}>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-8">
                 Subscription Details
               </h2>
               
-              <div className="border border-slate-200 rounded-lg p-4 sm:p-6 mb-6">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
-                  <span className="text-slate-700 text-sm sm:text-base">
-                    Monthly subscription to {creator.name}
-                  </span>
-                  <span className="text-lg sm:text-xl font-semibold text-slate-900">
-                    ${creator.monthlyPrice.toFixed(2)}/month
-                  </span>
+              <div className="border-2 border-slate-200 rounded-2xl p-6 mb-8 bg-gradient-to-br from-white to-slate-50 hover:border-slate-300 transition-all duration-300 hover:shadow-lg group">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <div className="flex items-center">
+                    <UserPlus className="w-6 h-6 mr-3 text-slate-700" />
+                    <div>
+                      <span className="text-slate-700 text-lg font-medium">
+                        Monthly subscription to {creator.name}
+                      </span>
+                      <p className="text-sm text-slate-500 mt-1">Cancel anytime</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-2xl font-bold text-slate-900">
+                      ${creator.monthlyPrice.toFixed(2)}
+                    </span>
+                    <span className="text-sm text-slate-500 font-normal ml-1">/month</span>
+                  </div>
                 </div>
               </div>
               
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 sm:p-6 mb-8">
-                <h3 className="font-semibold text-slate-900 flex items-center mb-4 text-sm sm:text-base">
-                  <ShieldCheck className="w-5 h-5 mr-2 text-slate-700" />
+              <div className="bg-gradient-to-br from-slate-50 to-white border-2 border-slate-200 rounded-2xl p-6 mb-8 hover:shadow-lg transition-all duration-300 group">
+                <h3 className="font-bold text-slate-900 flex items-center mb-6 text-lg group-hover:text-slate-800 transition-colors">
+                  <ShieldCheck className="w-6 h-6 mr-3 text-emerald-600 group-hover:scale-110 transition-transform" />
                   What you'll get:
                 </h3>
-                <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5 mr-3 text-slate-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-700 text-sm sm:text-base">
-                      Full access to all exclusive content
-                    </span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5 mr-3 text-slate-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-700 text-sm sm:text-base">
-                      Direct messaging with creator
-                    </span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5 mr-3 text-slate-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-700 text-sm sm:text-base">
-                      Early access to new releases
-                    </span>
-                  </li>
+                <ul className="space-y-4">
+                  {[
+                    "Full access to all exclusive content",
+                    "Direct messaging with creator",
+                    "Early access to new releases",
+                    "Member-only community access",
+                    "Monthly Q&A sessions"
+                  ].map((benefit, index) => (
+                    <li key={index} className="flex items-start group/benefit">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center mr-3 flex-shrink-0 group-hover/benefit:bg-emerald-200 transition-all duration-200 group-hover/benefit:scale-110">
+                        <Check className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      <span className="text-slate-700 flex-1 group-hover/benefit:text-slate-900 transition-colors">{benefit}</span>
+                    </li>
+                  ))}
                 </ul>
               </div>
               
               <button 
                 onClick={() => setPaymentStep(2)}
-                className="w-full py-3 sm:py-4 text-white font-semibold transition-all duration-200 bg-slate-900 rounded-lg hover:bg-slate-800 flex items-center justify-center text-sm sm:text-base"
+                className="w-full py-4 text-white font-bold transition-all duration-300 bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl hover:from-slate-900 hover:to-slate-800 flex items-center justify-center shadow-lg shadow-slate-900/20 hover:shadow-xl hover:shadow-slate-900/30 hover:scale-[1.02] group"
               >
                 Continue to Payment Method
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           )}
           
           {/* Step 2: Payment Method Selection */}
           {paymentStep === 2 && (
-            <div className="p-4 sm:p-6 lg:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 mb-6">
+            <div className={`p-6 sm:p-8 lg:p-10 transition-all duration-500 ${paymentStep === 2 ? 'opacity-100' : 'opacity-0'}`}>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-8">
                 Select Payment Method
               </h2>
               
               <div className="space-y-4 mb-8">
                 {/* PayPal Option */}
                 <div 
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                  className={`border-2 rounded-xl p-5 cursor-pointer transition-all duration-300 hover:scale-[1.02] group ${
                     selectedPaymentMethod === "paypal" 
-                      ? 'border-blue-600 bg-blue-50' 
-                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                      ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg shadow-blue-500/20' 
+                      : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
                   }`}
                   onClick={() => setSelectedPaymentMethod("paypal")}
                 >
                   <div className="flex items-center">
-                    <div className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${
+                    <div className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center transition-all duration-300 ${
                       selectedPaymentMethod === "paypal" 
-                        ? 'border-blue-600 bg-blue-600' 
-                        : 'border-slate-300'
+                        ? 'border-blue-500 bg-blue-500 scale-110' 
+                        : 'border-slate-300 group-hover:border-slate-400'
                     }`}>
                       {selectedPaymentMethod === "paypal" && (
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className="w-3 h-3 bg-white rounded-full"></div>
                       )}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-semibold text-slate-900">PayPal</h3>
+                          <h3 className="font-bold text-slate-900 text-lg">PayPal</h3>
                           <p className="text-sm text-slate-600">Pay securely with your PayPal account</p>
                         </div>
-                        <div className="w-12 h-8 bg-blue-100 rounded flex items-center justify-center">
-                          <span className="text-blue-800 font-bold">PP</span>
+                        <div className="w-16 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg">
+                          <span className="text-white font-bold text-lg">PP</span>
                         </div>
                       </div>
                     </div>
@@ -503,77 +514,47 @@ export default function CreatorSubscriptionPage() {
                 
                 {/* Credit/Debit Card Option */}
                 <div 
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                  className={`border-2 rounded-xl p-5 cursor-pointer transition-all duration-300 hover:scale-[1.02] group ${
                     selectedPaymentMethod === "card" 
-                      ? 'border-slate-900 bg-slate-50' 
-                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                      ? 'border-slate-800 bg-gradient-to-br from-slate-50 to-white shadow-lg shadow-slate-800/20' 
+                      : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
                   }`}
-                  onClick={() => setSelectedPaymentMethod("card")}
+                  onClick={() => {
+                    setSelectedPaymentMethod("card");
+                    setTimeout(() => setPaymentStep(3), 300);
+                  }}
                 >
                   <div className="flex items-center">
-                    <div className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${
+                    <div className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center transition-all duration-300 ${
                       selectedPaymentMethod === "card" 
-                        ? 'border-slate-900 bg-slate-900' 
-                        : 'border-slate-300'
+                        ? 'border-slate-800 bg-slate-800 scale-110' 
+                        : 'border-slate-300 group-hover:border-slate-400'
                     }`}>
                       {selectedPaymentMethod === "card" && (
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className="w-3 h-3 bg-white rounded-full"></div>
                       )}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-semibold text-slate-900">Credit or Debit Card</h3>
-                          <p className="text-sm text-slate-600">Visa, Mastercard, American Express, Discover</p>
+                          <h3 className="font-bold text-slate-900 text-lg">Credit or Debit Card</h3>
+                          <p className="text-sm text-slate-600">Visa, Mastercard, Amex, Discover</p>
                         </div>
-                        <div className="flex space-x-1">
-                          <div className="w-8 h-5 bg-blue-900 rounded-sm"></div>
-                          <div className="w-8 h-5 bg-red-900 rounded-sm"></div>
-                          <div className="w-8 h-5 bg-blue-500 rounded-sm"></div>
+                        <div className="flex space-x-2">
+                          <div className="w-10 h-7 bg-gradient-to-br from-blue-900 to-blue-700 rounded shadow-sm group-hover:shadow-md"></div>
+                          <div className="w-10 h-7 bg-gradient-to-br from-red-800 to-orange-600 rounded shadow-sm group-hover:shadow-md"></div>
+                          <div className="w-10 h-7 bg-gradient-to-br from-blue-500 to-blue-400 rounded shadow-sm group-hover:shadow-md"></div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                
-                {/* Add New Card Option */}
-                <div 
-                  className={`border-2 border-dashed rounded-lg p-4 cursor-pointer transition-all duration-200 ${
-                    selectedPaymentMethod === "newcard" 
-                      ? 'border-emerald-600 bg-emerald-50' 
-                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                  }`}
-                  onClick={() => {
-                    setSelectedPaymentMethod("newcard");
-                    setPaymentStep(3);
-                  }}
-                >
-                  <div className="flex items-center justify-center">
-                    <Plus className="w-5 h-5 text-slate-400 mr-2" />
-                    <span className="font-medium text-slate-700">Add New Credit/Debit Card</span>
-                  </div>
-                </div>
-                
-                {/* Other Payment Methods */}
-                <div className="pt-4">
-                  <h3 className="font-semibold text-slate-900 mb-3 text-sm">Other Payment Methods</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="border border-slate-200 rounded-lg p-3 text-center hover:bg-slate-50 cursor-not-allowed opacity-50">
-                      <div className="w-8 h-8 mx-auto mb-2 bg-slate-200 rounded"></div>
-                      <span className="text-sm text-slate-600">Apple Pay</span>
-                    </div>
-                    <div className="border border-slate-200 rounded-lg p-3 text-center hover:bg-slate-50 cursor-not-allowed opacity-50">
-                      <div className="w-8 h-8 mx-auto mb-2 bg-slate-200 rounded"></div>
-                      <span className="text-sm text-slate-600">Google Pay</span>
-                    </div>
-                  </div>
-                </div>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex gap-4">
                 <button 
                   onClick={() => setPaymentStep(1)}
-                  className="py-3 px-6 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors text-sm sm:text-base"
+                  className="py-3 px-6 border-2 border-slate-300 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-all duration-200 hover:scale-105"
                 >
                   Back
                 </button>
@@ -587,21 +568,21 @@ export default function CreatorSubscriptionPage() {
                     }
                   }}
                   disabled={!selectedPaymentMethod}
-                  className={`flex-1 py-3 text-white font-semibold transition-all duration-200 rounded-lg flex items-center justify-center text-sm sm:text-base ${
+                  className={`flex-1 py-3 text-white font-bold transition-all duration-300 rounded-xl flex items-center justify-center group ${
                     selectedPaymentMethod 
-                      ? 'bg-slate-900 hover:bg-slate-800' 
-                      : 'bg-slate-400 cursor-not-allowed'
+                      ? 'bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-slate-800 shadow-lg shadow-slate-900/20 hover:shadow-xl hover:scale-[1.02]' 
+                      : 'bg-slate-300 cursor-not-allowed'
                   }`}
                 >
                   {selectedPaymentMethod === "paypal" ? (
                     <>
-                      <Wallet className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                      <Lock className="w-5 h-5 mr-2" />
                       Pay with PayPal
                     </>
                   ) : selectedPaymentMethod === "card" ? (
                     <>
                       Continue to Card Details
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                     </>
                   ) : (
                     "Select Payment Method"
@@ -618,45 +599,54 @@ export default function CreatorSubscriptionPage() {
           
           {/* Step 3: Payment Form (Credit Card) */}
           {paymentStep === 3 && (
-            <div className="p-4 sm:p-6 lg:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 mb-6">
-                Add Payment Card
-              </h2>
+            <div className={`p-6 sm:p-8 lg:p-10 transition-all duration-500 ${paymentStep === 3 ? 'opacity-100' : 'opacity-0'}`}>
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+                  Add Payment Card
+                </h2>
+                <button 
+                  onClick={() => setPaymentStep(2)}
+                  className="text-sm text-slate-600 hover:text-slate-900 flex items-center"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Back
+                </button>
+              </div>
               
               {/* Interactive Credit Card */}
               <div 
-                className="relative w-full max-w-sm mx-auto h-48 sm:h-56 mb-8 rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl"
+                className="relative w-full max-w-sm mx-auto h-56 mb-10 rounded-2xl shadow-2xl overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-3xl hover:scale-105"
                 style={{ perspective: '1000px' }}
                 onClick={() => setIsFlipped(!isFlipped)}
               >
                 {/* Front of card */}
                 <div 
-                  className={`absolute inset-0 transition-all duration-500 ${isFlipped ? 'opacity-0' : 'opacity-100'}`}
+                  className={`absolute inset-0 transition-all duration-700 ${isFlipped ? 'opacity-0' : 'opacity-100'}`}
                   style={{
                     backfaceVisibility: 'hidden',
                     transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                   }}
                 >
-                  <div className="p-4 sm:p-6 w-full h-full rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 text-white">
-                    <div className="flex justify-between items-start">
+                  <div className="p-6 w-full h-full rounded-2xl bg-gradient-to-br from-slate-800 via-slate-900 to-black text-white shadow-2xl">
+                    <div className="flex justify-between items-start mb-8">
                       <div className="flex-1">
-                        <div className="w-10 h-6 sm:w-12 sm:h-8 bg-white/20 rounded-md mb-4 sm:mb-6"></div>
-                        <div className="text-base sm:text-lg font-mono tracking-wider mb-4 sm:mb-6 break-all">
+                        <div className="w-14 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg mb-8 shadow-lg"></div>
+                        <div className="text-xl font-mono tracking-widest mb-6 break-all">
                           {formData.card_number || '•••• •••• •••• ••••'}
                         </div>
                       </div>
-                      <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-white/70" />
+                      <CreditCard className="w-10 h-10 text-white/40" />
                     </div>
-                    <div className="mt-2 sm:mt-4 flex justify-between">
+                    <div className="flex justify-between items-end">
                       <div className="flex-1 pr-4">
-                        <div className="text-xs uppercase opacity-70 mb-1">Card Holder</div>
-                        <div className="font-medium text-sm truncate">
-                          {formData.card_holder_name || 'Your Name'}
+                        <div className="text-xs uppercase opacity-60 mb-2 tracking-wider">Card Holder</div>
+                        <div className="font-semibold truncate text-lg">
+                          {formData.card_holder_name || 'YOUR NAME'}
                         </div>
                       </div>
                       <div>
-                        <div className="text-xs uppercase opacity-70 mb-1">Expires</div>
-                        <div className="font-medium text-sm">{formData.expiry || 'MM/YY'}</div>
+                        <div className="text-xs uppercase opacity-60 mb-2 tracking-wider">Expires</div>
+                        <div className="font-semibold text-lg">{formData.expiry || 'MM/YY'}</div>
                       </div>
                     </div>
                   </div>
@@ -664,22 +654,22 @@ export default function CreatorSubscriptionPage() {
                 
                 {/* Back of card */}
                 <div 
-                  className={`absolute inset-0 transition-all duration-500 ${isFlipped ? 'opacity-100' : 'opacity-0'}`}
+                  className={`absolute inset-0 transition-all duration-700 ${isFlipped ? 'opacity-100' : 'opacity-0'}`}
                   style={{
                     backfaceVisibility: 'hidden',
                     transform: isFlipped ? 'rotateY(0deg)' : 'rotateY(-180deg)',
                   }}
                 >
-                  <div className="p-0 w-full h-full rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 text-white">
-                    <div className="w-full h-8 sm:h-12 bg-black mt-4 sm:mt-6"></div>
-                    <div className="p-4 sm:p-6">
-                      <div className="w-full h-8 sm:h-10 bg-white rounded-md flex items-center justify-end px-3 sm:px-4">
-                        <div className="text-black font-mono font-semibold text-sm">
+                  <div className="w-full h-full rounded-2xl bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 text-white shadow-2xl">
+                    <div className="w-full h-14 bg-black mt-8"></div>
+                    <div className="p-6">
+                      <div className="w-full h-12 bg-white rounded-lg flex items-center justify-end px-4 shadow-inner">
+                        <div className="text-black font-mono font-bold text-lg tracking-wider">
                           {formData.cvc || '•••'}
                         </div>
                       </div>
-                      <div className="mt-3 sm:mt-4 text-xs text-center opacity-70">
-                        This card is used only for payment processing and is handled securely
+                      <div className="mt-6 text-xs text-center opacity-70 leading-relaxed">
+                        This card is used only for secure payment processing
                       </div>
                     </div>
                   </div>
@@ -690,9 +680,9 @@ export default function CreatorSubscriptionPage() {
               <form onSubmit={(e) => {
                 e.preventDefault();
                 handlePaymentSubmit();
-              }} className="space-y-4 sm:space-y-6">
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-slate-700">
+              }} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-700">
                     Card Holder Name
                   </label>
                   <input
@@ -700,14 +690,14 @@ export default function CreatorSubscriptionPage() {
                     name="card_holder_name"
                     value={formData.card_holder_name}
                     onChange={handleInputChange}
-                    placeholder="Name on card"
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                    placeholder="John Doe"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all duration-200 hover:border-slate-300"
                     required
                   />
                 </div>
                 
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-slate-700">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-700">
                     Card Number
                   </label>
                   <div className="relative">
@@ -717,17 +707,17 @@ export default function CreatorSubscriptionPage() {
                       value={formData.card_number}
                       onChange={handleInputChange}
                       placeholder="1234 5678 9012 3456"
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 sm:pr-12 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                      className="w-full px-4 py-3 pr-12 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all duration-200 hover:border-slate-300"
                       onFocus={() => setIsFlipped(false)}
                       required
                     />
-                    <CreditCard className="absolute top-2.5 sm:top-3.5 right-3 sm:right-4 w-4 h-4 sm:w-5 sm:h-5 text-slate-400" />
+                    <CreditCard className="absolute top-4 right-4 w-5 h-5 text-slate-400" />
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                  <div>
-                    <label className="block mb-2 text-sm font-medium text-slate-700">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-slate-700">
                       Expiry Date
                     </label>
                     <input
@@ -736,35 +726,35 @@ export default function CreatorSubscriptionPage() {
                       value={formData.expiry}
                       onChange={handleInputChange}
                       placeholder="MM/YY"
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all duration-200 hover:border-slate-300"
                       onFocus={() => setIsFlipped(false)}
                       required
                     />
                   </div>
                   
-                  <div>
-                    <label className="block mb-2 text-sm font-medium text-slate-700">CVC</label>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-slate-700">CVC</label>
                     <input
                       type="text"
                       name="cvc"
                       value={formData.cvc}
                       onChange={handleInputChange}
                       placeholder="123"
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all duration-200 hover:border-slate-300"
                       onFocus={() => setIsFlipped(true)}
                       required
                     />
                   </div>
                 </div>
                 
-                <div className="pt-4 sm:pt-6">
-                  <h3 className="font-semibold text-slate-900 mb-4 text-base sm:text-lg">
+                <div className="pt-6">
+                  <h3 className="font-bold text-slate-900 mb-6 text-xl">
                     Billing Address
                   </h3>
                   
                   <div className="space-y-4">
-                    <div>
-                      <label className="block mb-2 text-sm font-medium text-slate-700">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-slate-700">
                         Address Line 1
                       </label>
                       <input
@@ -772,14 +762,14 @@ export default function CreatorSubscriptionPage() {
                         name="address_line1"
                         value={formData.address_line1}
                         onChange={handleInputChange}
-                        placeholder="Street address"
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                        placeholder="123 Main Street"
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all duration-200 hover:border-slate-300"
                         required
                       />
                     </div>
                     
-                    <div>
-                      <label className="block mb-2 text-sm font-medium text-slate-700">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-slate-700">
                         Address Line 2 (Optional)
                       </label>
                       <input
@@ -788,26 +778,26 @@ export default function CreatorSubscriptionPage() {
                         value={formData.address_line2}
                         onChange={handleInputChange}
                         placeholder="Apartment, suite, unit, etc."
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all duration-200 hover:border-slate-300"
                       />
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block mb-2 text-sm font-medium text-slate-700">City</label>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-700">City</label>
                         <input
                           type="text"
                           name="city"
                           value={formData.city}
                           onChange={handleInputChange}
-                          placeholder="City"
-                          className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                          placeholder="New York"
+                          className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all duration-200 hover:border-slate-300"
                           required
                         />
                       </div>
                       
-                      <div>
-                        <label className="block mb-2 text-sm font-medium text-slate-700">
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-700">
                           State / Province
                         </label>
                         <input
@@ -815,16 +805,16 @@ export default function CreatorSubscriptionPage() {
                           name="state"
                           value={formData.state}
                           onChange={handleInputChange}
-                          placeholder="State"
-                          className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                          placeholder="NY"
+                          className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all duration-200 hover:border-slate-300"
                           required
                         />
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block mb-2 text-sm font-medium text-slate-700">
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-700">
                           ZIP / Postal Code
                         </label>
                         <input
@@ -832,19 +822,19 @@ export default function CreatorSubscriptionPage() {
                           name="postal_code"
                           value={formData.postal_code}
                           onChange={handleInputChange}
-                          placeholder="Postal code"
-                          className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                          placeholder="10001"
+                          className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all duration-200 hover:border-slate-300"
                           required
                         />
                       </div>
                       
-                      <div>
-                        <label className="block mb-2 text-sm font-medium text-slate-700">Country</label>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-700">Country</label>
                         <select
                           name="country"
                           value={formData.country}
                           onChange={handleInputChange}
-                          className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                          className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all duration-200 hover:border-slate-300"
                           required
                         >
                           <option value="US">United States</option>
@@ -859,29 +849,31 @@ export default function CreatorSubscriptionPage() {
                   </div>
                 </div>
                 
-                <div className="border border-slate-200 rounded-lg p-4 sm:p-6 bg-slate-50">
-                  <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mb-3">
-                    <span className="text-slate-700 text-sm sm:text-base">Monthly subscription</span>
-                    <span className="font-semibold text-slate-900 text-sm sm:text-base">
+                <div className="border-2 border-slate-200 rounded-2xl p-6 bg-gradient-to-br from-slate-50 to-white mt-8">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-slate-700 font-medium">Monthly subscription</span>
+                    <span className="font-bold text-slate-900 text-lg">
                       ${creator.monthlyPrice.toFixed(2)}
                     </span>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:justify-between gap-2 text-lg font-semibold text-slate-900 pt-3 border-t border-slate-200">
+                  <div className="flex justify-between items-center text-2xl font-bold text-slate-900 pt-4 border-t-2 border-slate-200">
                     <span>Total today</span>
-                    <span>${creator.monthlyPrice.toFixed(2)}</span>
+                    <span className="bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                      ${creator.monthlyPrice.toFixed(2)}
+                    </span>
                   </div>
                 </div>
                 
-                <div className="flex items-start text-sm text-slate-600 bg-slate-50 p-3 sm:p-4 rounded-lg border border-slate-200">
-                  <Lock className="w-4 h-4 mr-2 text-slate-500 flex-shrink-0 mt-0.5" />
-                  <span>Your payment information is encrypted and secure</span>
+                <div className="flex items-start text-sm text-slate-600 bg-gradient-to-r from-slate-50 to-white p-4 rounded-xl border-2 border-slate-200">
+                  <Lock className="w-5 h-5 mr-3 text-slate-500 flex-shrink-0 mt-0.5" />
+                  <span>Your payment information is encrypted and secure with industry-standard SSL technology</span>
                 </div>
                 
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex gap-4 pt-4">
                   <button 
                     type="button"
                     onClick={() => setPaymentStep(2)}
-                    className="py-3 px-6 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors text-sm sm:text-base"
+                    className="py-4 px-8 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all duration-200 hover:scale-105"
                   >
                     Back
                   </button>
@@ -889,21 +881,25 @@ export default function CreatorSubscriptionPage() {
                   <button 
                     type="submit"
                     disabled={!isFormValid() || processing}
-                    className={`flex-1 py-3 sm:py-4 text-white font-semibold transition-all duration-200 rounded-lg flex items-center justify-center text-sm sm:text-base ${
+                    className={`flex-1 py-4 text-white font-bold transition-all duration-300 rounded-xl flex items-center justify-center shadow-lg group ${
                       isFormValid() && !processing 
-                        ? 'bg-slate-900 hover:bg-slate-800' 
-                        : 'bg-slate-400 cursor-not-allowed'
+                        ? 'bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-slate-800 shadow-slate-900/20 hover:shadow-xl hover:scale-[1.02]' 
+                        : 'bg-slate-300 cursor-not-allowed'
                     }`}
                   >
                     {processing ? (
                       <>
-                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
-                        Processing...
+                        <div className="relative w-5 h-5 mr-3">
+                          <div className="absolute inset-0 border-3 border-white/30 rounded-full"></div>
+                          <div className="absolute inset-0 border-3 border-white rounded-full border-t-transparent animate-spin"></div>
+                        </div>
+                        Processing Payment...
                       </>
                     ) : (
                       <>
+                        <Lock className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
                         Pay ${creator.monthlyPrice.toFixed(2)} 
-                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+                        <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                       </>
                     )}
                   </button>
@@ -911,15 +907,17 @@ export default function CreatorSubscriptionPage() {
               </form>
               
               {error && (
-                <div className="p-3 sm:p-4 mt-4 sm:mt-6 text-red-800 bg-red-50 rounded-lg border border-red-200">
+                <div className={`p-4 mt-6 text-red-800 bg-gradient-to-r from-red-50 to-red-100 rounded-xl border-2 border-red-200 transition-all duration-500 ${error ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
                   <div className="flex items-start">
-                    <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="flex-grow text-sm sm:text-base">{error}</span>
+                    <div className="w-8 h-8 rounded-full bg-red-200 flex items-center justify-center mr-3 flex-shrink-0">
+                      <AlertCircle className="w-5 h-5 text-red-600" />
+                    </div>
+                    <span className="flex-grow font-medium">{error}</span>
                     <button 
                       onClick={() => setError("")}
-                      className="ml-2 text-red-600 hover:text-red-800 transition-colors flex-shrink-0"
+                      className="ml-2 text-red-600 hover:text-red-800 transition-colors flex-shrink-0 hover:scale-110"
                     >
-                      <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
